@@ -1,52 +1,88 @@
+
 class Node:
-    def __init__(self,customer):
+    def __init__(self, customer):
         self.customer = customer
         self.next = None
 
+    def __repr__(self):
+        return f"Node({self.customer})"
+
+
 class Queue:
     def __init__(self):
-        #take 2 pointers head and tail
         self.head = None
         self.tail = None
+        self.size = 0
 
-    def enqueue(self,cust):
-        new = Node(cust)
-
+    def enqueue(self, cust):
+        new_node = Node(cust)
         if self.head is None:
-            self.head = self.tail = new
+            self.head = self.tail = new_node
         else:
-            self.tail.next = new
-            self.tail = new
+            self.tail.next = new_node
+            self.tail = new_node
+        self.size += 1
+
+    def dequeue(self):
+        if self.head is None:
+            raise IndexError("dequeue from empty queue")
+        cust = self.head.customer
+        self.head = self.head.next
+        if self.head is None:
+            self.tail = None
+        self.size -= 1
+        return cust
 
     def split(self):
-        count = 0
+        """Splits this queue into two new Queue objects and returns them."""
+        mid = self.size // 2
+        first_half, second_half = Queue(), Queue()
+
         current = self.head
+        for _ in range(mid):
+            first_half.enqueue(current.customer)
+            current = current.next
 
         while current:
-            count+=1
-            current = current.next
-        mid = count//2
-        print("MId",mid)
-        current = self.head
-        print("Frst queue:")
-        for i in range(mid):
-            print(current.customer,end=" ")
+            second_half.enqueue(current.customer)
             current = current.next
 
-        print("\nSecond queue:")
+        return first_half, second_half
+
+    def __str__(self):
+        items = []
+        current = self.head
         while current:
-            print(current.customer,end=" ")
+            items.append(str(current.customer))
             current = current.next
-choice = 1  
-count = 0   
-q = Queue()          
+        return " ".join(items)
+
+
+def get_valid_choice():
+    while True:
+        try:
+            choice = int(input("Add people? Note: Only 0 or 1 is accepted: "))
+            if choice in (0, 1):
+                return choice
+        except ValueError:
+            pass
+        print("Invalid input, try again.")
+
+
+count = 0
+q = Queue()
+choice = 1
+
 while choice:
-    #0 = no more customers are added and 1 = we are adding another person
-    choice = int(input("Add people? Note: Only 0 or 1 is accepted "))
-    if choice == 1: 
-        count += 1 
+    choice = get_valid_choice()
+    if choice == 1:
+        count += 1
         q.enqueue(count)
-print("HEAD:", q.head) 
-if q.head is not None: 
-    print("HEAD CUSTOMER:", q.head.customer) 
-q.split()
+
+print("HEAD:", q.head)
+if q.head is not None:
+    print("HEAD CUSTOMER:", q.head.customer)
+
+first, second = q.split()
+print("First queue:", first)
+print("Second queue:", second)
